@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* 商品图片展示 */
+        .product-container {
+            width: 100%;
+            margin-bottom: 60px; /* 为底部按钮留出空间 */
+        }
+
+        .product-image {
+            width: 100%;
+            display: block;
+        }
+
+        /* 底部购买按钮 */
+        .buy-button {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 20px;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 12px;
+            background: #ff4d4f;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        /* 商品选择弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: block;
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .product-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-title {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            color: #ff4d4f;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .product-desc {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* 遮罩层 */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        /* 关闭按钮 */
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            width: 24px;
+            height: 24px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            line-height: 1;
+            color: #999;
+        }
+        .back-button {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .back-button:active {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 返回箭头图标样式 */
+        .back-arrow {
+            width: 12px;
+            height: 12px;
+            border-left: 2px solid #333;
+            border-bottom: 2px solid #333;
+            transform: rotate(45deg);
+            margin-left: 4px;
+        }
+
+        /* 为顶部预留空间 */
+        .container {
+            margin-top: 20px;
+        }
+        .modal-footer {
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 15px 20px; /* 增加左右内边距 */
+        background: white;
+        border-top: 1px solid #f0f0f0;
+        margin-top: 20px;
+    }
+
+    /* 弹窗中的购买按钮样式 */
+    .modal-buy-btn {
+        display: block; /* 设置为块级元素 */
+        width: 90%; /* 设置宽度 */
+        margin: 0 auto; /* 水平居中 */
+        padding: 12px 0; /* 上下内边距 */
+        background-color: #ff4d4f; /* 红色背景 */
+        color: white; /* 白色文字 */
+        border: none;
+        border-radius: 25px; /* 圆角 */
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease; /* 添加过渡效果 */
+    }
+
+    /* 按钮悬停效果 */
+    .modal-buy-btn:hover {
+        background-color: #ff2629; /* 稍深的红色 */
+    }
+
+    /* 按钮点击效果 */
+    .modal-buy-btn:active {
+        background-color: #f5222d;
+        transform: scale(0.98);
+    }
+    </style>
+</head>
+<body>
+    <!-- 商品图片展示区域 -->
+    <div class="product-container">
+        <img src="image/image.png" alt="商品详情" class="product-image">
+        <!-- 可以添加多张商品详情图 -->
+        <img src="image/imagecopy.png" alt="商品详情" class="product-image">
+    </div>
+
+    <!-- 底部购买按钮 -->
+    <div class="buy-button">
+        <button class="buy-btn" onclick="showModal()">立即购买</button>
+    </div>
+
+    <!-- 遮罩层 -->
+    <div class="overlay" onclick="hideModal()"></div>
+
+   <!-- 商品选择弹窗 -->
+   <div class="modal">
+    <button class="close-btn" onclick="hideModal()">&times;</button>
+    <div class="modal-header">
+        <img src="image/shangpintu.png" alt="商品预览" class="product-preview">
+        <div class="product-info">
+            <div class="product-title">文史天梯</div>
+            <div class="product-price">¥299.00</div>
+            <div class="product-desc">大阅读最牛逼的产品</div>
+        </div>
+    </div>
+    <div class="modal-content">
+        <!-- 这里可以添加商品规格选择等其他内容 -->
+    </div>
+    <div class="modal-footer">
+        <button class="modal-buy-btn" onclick="goToCheckout()">立即购买</button>
+    </div>
+</div>
+
+<script>
+    function goToCheckout() {
+        // 获取商品信息
+        const title = document.querySelector('.product-title').textContent;
+        const price = document.querySelector('.product-price').textContent;
+        const image = document.querySelector('.product-preview').src;
+        
+        // 将商品信息存储到 localStorage
+        const orderInfo = {
+            title: title,
+            price: price,
+            image: image
+        };
+        localStorage.setItem('orderInfo', JSON.stringify(orderInfo));
+        
+        // 跳转到结算页面
+        window.location.href = 'checkout.html';
+    }
+</script>
+    </div>
+
+    <script>
+        function showModal() {
+            document.querySelector('.overlay').classList.add('show');
+            document.querySelector('.modal').classList.add('show');
+            // 禁止背景滚动
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideModal() {
+            document.querySelector('.overlay').classList.remove('show');
+            document.querySelector('.modal').classList.remove('show');
+            // 恢复背景滚动
+            document.body.style.overflow = '';
+        }
+    </script>
+</body>
+</html>
